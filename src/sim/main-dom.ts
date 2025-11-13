@@ -2,7 +2,10 @@ import { State } from './state';
 
 export function bindDOM() {
   State.canvas = document.getElementById('c') as HTMLCanvasElement;
-  State.ctx = State.canvas.getContext('2d', { alpha: false });
+  State.gl = State.canvas.getContext('webgl2') || State.canvas.getContext('webgl', { alpha: true });
+  if (!State.gl) {
+    throw new Error('WebGL not supported');
+  }
   const get = (id: string) => document.getElementById(id);
   State.hud.root = get('hud');
   State.hud.fps = get('fps');

@@ -58,5 +58,5 @@ export function initHUD(){
   cycleSetting(State.hud.colorMode,['particles','colorMode'],['solid','velocity','heat'],null);
   cycleSetting(State.hud.boundMode,['physics','boundaries'],['screen-bounce','screen-wrap','none','container-circle','container-square'],()=>{ rebuildParticles(false); });
   if(State.hud.root) State.hud.root.style.display = Settings.visuals.showHUD? 'block':'none';
-  updateHUD(); setInterval(updateHUD, 400);
+  updateHUD();
 }

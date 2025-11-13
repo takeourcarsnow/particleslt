@@ -3,7 +3,7 @@ import type { Particle, PointerState, HUDRefs, ElementRefs } from './types';
 
 interface SimState {
   canvas: HTMLCanvasElement|null;
-  ctx: CanvasRenderingContext2D|null;
+  gl: WebGLRenderingContext|null;
   W:number; H:number; DPR:number;
   particles: Particle[];
   heatDecay:number;
@@ -15,10 +15,11 @@ interface SimState {
   hud: HUDRefs;
   els: ElementRefs;
   haveDeviceOrientation:boolean;
+  worker: Worker|null;
 }
 
 export const State: SimState = {
-  canvas:null, ctx:null, W:0, H:0, DPR:1,
+  canvas:null, gl:null, W:0, H:0, DPR:1,
   particles:[], heatDecay:0.97, running:true, stepOnce:false,
   gDir:{x:0,y:1}, mouseGravity:{x:0,y:1}, tiltEnabled:false,
   lastT: (typeof performance!=='undefined'? performance.now():0), fpsSmooth:60, substeps:Settings.performance.substeps,
@@ -27,4 +28,5 @@ export const State: SimState = {
   hud:{ root:null,fps:null,collMode:null,turbMode:null,tiltState:null,mouseG:null,gravityVal:null,countVal:null,shapeMode:null,colorMode:null,boundMode:null,pauseBtn:null,stepBtn:null,resetBtn:null,fullscreenBtn:null },
   els:{ panel:null,tabsEl:null,contentEl:null,togglePanel:null,randomizeBtn:null,presetMenuBtn:null,tiltPrompt:null,tiltBtn:null,tiltBtnTop:null,dismissTilt:null },
   haveDeviceOrientation: typeof window!=='undefined' && (('DeviceOrientationEvent' in window) || ('DeviceMotionEvent' in window)),
+  worker: null,
 };

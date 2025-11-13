@@ -40,7 +40,7 @@ function makeParticle():Particle{
   const r = uniform ? Settings.particles.radiusMax : rand(Settings.particles.radiusMin, Settings.particles.radiusMax);
   const m = massForRadius(r);
   const pos = spawnPosFor(r);
-  return { x: pos.x, y: pos.y, vx: rand(-40,40), vy: rand(-40,40), r, m, heat:0, color: Settings.particles.solidColor };
+  return { x: pos.x, y: pos.y, vx: rand(-40,40), vy: rand(-40,40), r, m, invM: 1/m, heat:0, color: Settings.particles.solidColor };
 }
 export function rebuildParticles(keepPositions=false){
   const target = clamp(Settings.particles.count, 0, Settings.performance.maxParticles)|0;
@@ -61,7 +61,7 @@ export function applyUniformRadius(){
   if(!Settings.particles.uniformSize) return;
   const r = Settings.particles.radiusMax;
   for(const p of State.particles){
-    p.r = r; p.m = massForRadius(r);
+    p.r = r; p.m = massForRadius(r); p.invM = 1/p.m;
     p.x = clamp(p.x, r, (State.canvas!.width)/State.DPR - r);
     p.y = clamp(p.y, r, (State.canvas!.height)/State.DPR - r);
   }

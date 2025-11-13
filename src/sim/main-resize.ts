@@ -10,6 +10,5 @@ export function resize() {
   State.canvas!.style.height = h + 'px';
   State.W = State.canvas!.width;
   State.H = State.canvas!.height;
-  State.ctx!.setTransform(State.DPR, 0, 0, State.DPR, 0, 0);
-  State.ctx!.imageSmoothingEnabled = false;
+  State.gl!.viewport(0, 0, State.W, State.H);
 }

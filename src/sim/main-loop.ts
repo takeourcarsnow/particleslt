@@ -3,7 +3,7 @@ import { State } from './state';
 import { hexWithAlpha, mapBoundaries, curlNoise, flowNoiseVec, DEG } from './utils';
 import { buildGrid, neighbors } from './grid';
 import { computeWellsPositions } from './forces';
-import { drawParticle, drawContainerOutline } from './renderer';
+import { drawParticles, clearBackground } from './renderer';
 import { updateHUD } from './hud';
 
 export function frame(t: number) {
@@ -29,11 +29,9 @@ export function frame(t: number) {
     const gxBase = sourceG.x * gmag * Settings.physics.tiltSensitivity;
     const gyBase = sourceG.y * gmag * Settings.physics.tiltSensitivity;
     if (Settings.visuals.trail <= 0.001) {
-      State.ctx!.fillStyle = Settings.visuals.background;
-      State.ctx!.fillRect(0, 0, State.canvas!.width / State.DPR, State.canvas!.height / State.DPR);
+      clearBackground(Settings.visuals.background);
     } else {
-      State.ctx!.fillStyle = hexWithAlpha(Settings.visuals.background, 1 - Settings.visuals.trail);
-      State.ctx!.fillRect(0, 0, State.canvas!.width / State.DPR, State.canvas!.height / State.DPR);
+      clearBackground(hexWithAlpha(Settings.visuals.background, 1 - Settings.visuals.trail));
     }
     if (Settings.collisions.enable && Settings.collisions.mode !== 'none') { buildGrid(); }
     for (let s = 0; s < sub; s++) {
@@ -49,16 +47,16 @@ export function frame(t: number) {
       const wells = tm === 'wells' ? computeWellsPositions(time) : null;
       for (let i = 0; i < State.particles.length; i++) {
         const p = State.particles[i];
-        const axBase = gxBase / p.m + Settings.physics.windX / p.m;
-        const ayBase = gyBase / p.m + Settings.physics.windY / p.m;
+        const axBase = gxBase * p.invM + Settings.physics.windX * p.invM;
+        const ayBase = gyBase * p.invM + Settings.physics.windY * p.invM;
         let ax = axBase;
         let ay = ayBase;
         if (tm === 'flow') {
-          const v = flowNoiseVec(p.x, p.y, tt, sca, amp / p.m);
+          const v = flowNoiseVec(p.x, p.y, tt, sca, amp * p.invM);
           ax += v.x;
           ay += v.y;
         } else if (tm === 'curl') {
-          const v = curlNoise(p.x, p.y, tt, sca, amp * Settings.forces.curlStrength / p.m);
+          const v = curlNoise(p.x, p.y, tt, sca, amp * Settings.forces.curlStrength * p.invM);
           ax += v.x;
           ay += v.y;
         } else if (tm === 'vortex') {
@@ -70,22 +68,22 @@ export function frame(t: number) {
           const strength = Settings.forces.vortexStrength / Math.pow(r, Settings.forces.vortexFalloff);
           let tx = -dy / r, ty = dx / r;
           if (!Settings.forces.vortexCW) { tx = -tx; ty = -ty; }
-          ax += tx * strength / p.m;
-          ay += ty * strength / p.m;
-          const cent = amp * 0.1 / p.m;
+          ax += tx * strength * p.invM;
+          ay += ty * strength * p.invM;
+          const cent = amp * 0.1 * p.invM;
           ax += -dx / r * cent;
           ay += -dy / r * cent;
         } else if (tm === 'wind') {
           const v = flowNoiseVec(p.x * 0.7, p.y * 0.7, tt, sca * 0.6, (Settings.forces.windVar || 0));
           const gust = flowNoiseVec(p.x * 0.3, p.y * 0.3, tt * 1.7, sca * 0.4, (Settings.forces.windGust || 0));
-          ax += (v.x + gust.x) / p.m;
-          ay += (v.y + gust.y) / p.m;
+          ax += (v.x + gust.x) * p.invM;
+          ay += (v.y + gust.y) * p.invM;
         } else if (tm === 'jets') {
           const ang = Settings.forces.jetsAngle * DEG;
           const ux = Math.cos(ang), uy = Math.sin(ang);
           const phi = ((p.x * ux + p.y * uy) / Math.max(10, Settings.forces.jetsSpacing)) * Math.PI * 2 + tt * 2.0;
           const band = Math.sin(phi);
-          const F = amp * band / p.m;
+          const F = amp * band * p.invM;
           ax += ux * F;
           ay += uy * F;
         } else if (tm === 'swirlgrid') {
@@ -101,7 +99,7 @@ export function frame(t: number) {
           }
           const tx = (-dy / r) * cw, ty = (dx / r) * cw;
           const fall = 1 / Math.pow(1 + (r / spacing), Settings.forces.swirlFalloff);
-          const F = amp * fall / p.m;
+          const F = amp * fall * p.invM;
           ax += tx * F;
           ay += ty * F;
         } else if (tm === 'wells' && wells) {
@@ -114,11 +112,11 @@ export function frame(t: number) {
             const nx = dx / r, ny = dy / r;
             const sgn = Settings.forces.wellsRepel ? -1 : 1;
             const base = k / Math.pow(r, falloff);
-            ax += nx * base * sgn / p.m;
-            ay += ny * base * sgn / p.m;
+            ax += nx * base * sgn * p.invM;
+            ay += ny * base * sgn * p.invM;
             const cw = (w % 2 === 0 ? 1 : -1);
             const tx = -ny * cw, ty = nx * cw;
-            const spin = Settings.forces.wellsSpin * base / p.m;
+            const spin = Settings.forces.wellsSpin * base * p.invM;
             ax += tx * spin;
             ay += ty * spin;
           }
@@ -132,7 +130,7 @@ export function frame(t: number) {
             const d = Math.sqrt(d2) + 1e-4;
             const nx = dx / d, ny = dy / d;
             const fall = 1 - d / rr;
-            const F = Settings.pointer.strength * fall * fall / p.m;
+            const F = Settings.pointer.strength * fall * fall * p.invM;
             if (Settings.pointer.tool === 'attract') {
               ax += -nx * F;
               ay += -ny * F;
@@ -140,8 +138,8 @@ export function frame(t: number) {
               ax += nx * F;
               ay += ny * F;
             } else if (Settings.pointer.tool === 'push') {
-              ax += (State.pointer.dx * 60) * fall / p.m;
-              ay += (State.pointer.dy * 60) * fall / p.m;
+              ax += (State.pointer.dx * 60) * fall * p.invM;
+              ay += (State.pointer.dy * 60) * fall * p.invM;
             } else if (Settings.pointer.tool === 'spin') {
               ax += (-ny) * F * 0.8;
               ay += (nx) * F * 0.8;
@@ -303,19 +301,19 @@ export function frame(t: number) {
                   const invMassSum = 1 / p.m + 1 / q.m;
                   const jimp = -(1 + e2) * vn / invMassSum;
                   const ix = nx * jimp, iy = ny * jimp;
-                  p.vx -= ix / p.m;
-                  p.vy -= iy / p.m;
-                  q.vx += ix / q.m;
-                  q.vy += iy / q.m;
+                  p.vx -= ix * p.invM;
+                  p.vy -= iy * p.invM;
+                  q.vx += ix * q.invM;
+                  q.vy += iy * q.invM;
                   const fr = Settings.physics.particleFriction;
                   const tvx = rvx - vn * nx, tvy = rvy - vn * ny;
                   const tlen = Math.hypot(tvx, tvy) || 1e-6;
                   const tx = tlen ? tvx / tlen : 0, ty = tlen ? tvy / tlen : 0;
                   const jt = -fr * jimp;
-                  p.vx -= tx * jt / p.m;
-                  p.vy -= ty * jt / p.m;
-                  q.vx += tx * jt / q.m;
-                  q.vy += ty * jt / q.m;
+                  p.vx -= tx * jt * p.invM;
+                  p.vy -= ty * jt * p.invM;
+                  q.vx += tx * jt * q.invM;
+                  q.vy += ty * jt * q.invM;
                   if (Settings.particles.colorMode === 'heat') {
                     const loss = (1 - rest) * Math.abs(vn) * 0.02;
                     p.heat = Math.max(0, Math.min(1.2, p.heat + loss));
@@ -331,21 +329,19 @@ export function frame(t: number) {
       }
     }
   }
-  State.ctx!.globalCompositeOperation = Settings.particles.blend as GlobalCompositeOperation;
-  for (let i = 0; i < State.particles.length; i++) {
-    drawParticle(State.ctx!, State.particles[i]);
-  }
-  drawContainerOutline(State.ctx!);
-  State.ctx!.globalCompositeOperation = 'source-over';
-  State.ctx!.strokeStyle = 'rgba(106,227,255,0.6)';
-  State.ctx!.lineWidth = 2;
-  const cxv = State.canvas!.width / State.DPR / 2, cyv = State.canvas!.height / State.DPR / 2;
-  const gv = Settings.controls.mouseSetsGravity ? State.mouseGravity : State.gDir;
-  State.ctx!.beginPath();
-  State.ctx!.moveTo(cxv, cyv);
-  State.ctx!.lineTo(cxv + gv.x * 0, cyv + gv.y * 0);
-  State.ctx!.stroke();
+  drawParticles(State.particles);
+  // drawContainerOutline(State.ctx!);
+  // State.ctx!.globalCompositeOperation = 'source-over';
+  // State.ctx!.strokeStyle = 'rgba(106,227,255,0.6)';
+  // State.ctx!.lineWidth = 2;
+  // const cxv = State.canvas!.width / State.DPR / 2, cyv = State.canvas!.height / State.DPR / 2;
+  // const gv = Settings.controls.mouseSetsGravity ? State.mouseGravity : State.gDir;
+  // State.ctx!.beginPath();
+  // State.ctx!.moveTo(cxv, cyv);
+  // State.ctx!.lineTo(cxv + gv.x * 0, cyv + gv.y * 0);
+  // State.ctx!.stroke();
   State.stepOnce = false;
   State.frameCount++;
+  if (State.frameCount % 10 === 0) updateHUD();
   requestAnimationFrame(frame);
 }
