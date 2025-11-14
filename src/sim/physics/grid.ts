@@ -1,4 +1,4 @@
-import { PARTICLE_SIZE, X, Y } from './types';
+import { PARTICLE_SIZE, X, Y } from '../../types/types';
 
 // Grid functions
 const grid: Map<number, number[]> = new Map();
@@ -42,3 +42,18 @@ export function neighbors(i: number, particles: Float32Array, maxRadius: number)
   if (res.length > maxNeighbors) res.length = maxNeighbors;
   return res;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

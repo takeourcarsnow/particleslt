@@ -1,8 +1,8 @@
-import type { SettingsType } from './config-types';
-import type { PointerState } from './types';
-import { PARTICLE_SIZE, X, Y, VX, VY, INV_M, HEAT } from './types';
-import { DEG, LCG } from './utils';
-import { sampleBilinear, getCurlX, getCurlY, getFlowX, getFlowY, getWindX, getWindY, getGustX, getGustY } from './physics-noise';
+import type { SettingsType } from '../config/types';
+import type { PointerState } from '../../types/types';
+import { PARTICLE_SIZE, X, Y, VX, VY, INV_M, HEAT } from '../../types/types';
+import { DEG, LCG } from '../../utils/utils';
+import { sampleBilinear, getCurlX, getCurlY, getFlowX, getFlowY, getWindX, getWindY, getGustX, getGustY } from './noise';
 import { turbulenceForArray } from './turbulence';
 
 export function computeWellsPositions(t: number, settings: SettingsType, BW: number, BH: number) {
@@ -117,3 +117,19 @@ export function applyIntegration(particles: Float32Array, i: number, ax: number,
     particles[base + HEAT] = particles[base + HEAT] * data.heatDecay + Math.max(0, Math.min(0.05, speed2 * 0.000001));
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

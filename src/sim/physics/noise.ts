@@ -1,5 +1,5 @@
-import type { SettingsType } from './config-types';
-import { lerp } from './utils';
+import type { SettingsType } from '../config/types';
+import { lerp } from '../../utils/utils';
 
 // Precomputed noise fields
 const GRID_SIZE = 128;
@@ -78,4 +78,19 @@ export function getGustX(): Float32Array | null { return gustX; }
 export function getGustY(): Float32Array | null { return gustY; }
 
 // Import noise functions from utils
-import { curlNoise, flowNoiseVec } from './utils';
+import { curlNoise, flowNoiseVec } from '../../utils/utils';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

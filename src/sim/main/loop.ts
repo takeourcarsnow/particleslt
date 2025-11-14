@@ -1,12 +1,12 @@
-import { Settings } from './config';
-import { State } from './state';
-import { hexWithAlpha } from './utils';
-import { clearBackground, drawParticles } from './renderer';
-import { updateHUD } from './hud';
-import { buildGrid } from './grid';
-import { drawContainerOutline } from './main-loop-rendering';
-import { updatePerformanceMetrics, applyAdaptiveSettings } from './main-loop-performance';
-import { simulatePhysicsStep, handleCollisions, handleBoundaries } from './main-loop-physics';
+import { Settings } from '../config/index';
+import { State } from '../state';
+import { hexWithAlpha } from '../../utils/utils';
+import { clearBackground, drawParticles } from '../renderer';
+import { updateHUD } from '../../components/hud';
+import { buildGrid } from '../grid';
+import { drawContainerOutline } from './loop-rendering';
+import { updatePerformanceMetrics, applyAdaptiveSettings } from './loop-performance';
+import { simulatePhysicsStep, handleCollisions, handleBoundaries } from './loop-physics';
 
 export function frame(t: number) {
   const dtRaw = Math.min(1 / 20, (t - State.lastT) / 1000) * Settings.performance.simSpeed;
@@ -41,3 +41,19 @@ export function frame(t: number) {
   if (State.frameCount % 10 === 0) updateHUD();
   requestAnimationFrame(frame);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

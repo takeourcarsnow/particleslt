@@ -1,7 +1,7 @@
-import { Settings } from './config';
+import { Settings } from './config/index';
 import { State } from './state';
-import { clamp, paletteColor } from './utils';
-import type { Particle } from './types';
+import { clamp, paletteColor } from '../utils/utils';
+import type { Particle } from '../types/types';
 
 let gl: WebGLRenderingContext | WebGL2RenderingContext;
 let program: WebGLProgram;
@@ -258,3 +258,15 @@ export function clearBackground(color: string) {
   gl.clearColor(r, g, b, a);
   gl.clear(gl.COLOR_BUFFER_BIT);
 }
+
+
+
+
+
+
+
+
+
+
+
+

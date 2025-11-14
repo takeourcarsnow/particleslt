@@ -1,4 +1,4 @@
-import { State } from './state';
+import { State } from '../state';
 
 export function resize() {
   if (typeof window === 'undefined') return; // SSR guard
@@ -17,3 +17,19 @@ export function resize() {
   State.H = State.canvas!.height;
   State.gl!.viewport(0, 0, State.W, State.H);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

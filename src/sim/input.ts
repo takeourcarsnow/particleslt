@@ -1,8 +1,8 @@
-import { Settings } from './config';
+import { Settings } from './config/index';
 import { State } from './state';
-import { DEG } from './utils';
+import { DEG } from '../utils/utils';
 import { rebuildParticles } from './particles';
-import { updateHUD } from './hud';
+import { updateHUD } from '../components/hud';
 
 export function setMouseGravityFromPoint(px:number,py:number){
   const cx = (State.canvas?.clientWidth||0)/2, cy=(State.canvas?.clientHeight||0)/2; const dx = (px-cx), dy=(py-cy); const len=Math.hypot(dx,dy)||1; State.mouseGravity.x=dx/len; State.mouseGravity.y=dy/len; }
@@ -21,3 +21,15 @@ function initPointer(){ const pointerEl=State.canvas!; function setPointer(e: Po
 function initKeyboard(){ window.addEventListener('keydown',(e)=>{ if(e.key===' '){ State.running=!State.running; e.preventDefault(); } if(e.key==='c'||e.key==='C'){ State.els.panel?.classList.toggle('hidden'); } if(e.key==='g'||e.key==='G'){ Settings.controls.mouseSetsGravity=!Settings.controls.mouseSetsGravity; updateHUD(); } if(e.key==='r'||e.key==='R'){ rebuildParticles(false); } if(e.key==='f'||e.key==='F'){ Settings.visuals.showHUD=!Settings.visuals.showHUD; if(State.hud.root) State.hud.root.style.display=Settings.visuals.showHUD?'block':'none'; } }); }
 export function initInput(){ if(State.haveDeviceOrientation && State.els.tiltPrompt){ setTimeout(()=>{ if(State.els.tiltPrompt) State.els.tiltPrompt.hidden=false; },600); }
   State.els.tiltBtn?.addEventListener('click',enableTiltRequest); State.els.tiltBtnTop?.addEventListener('click',enableTiltRequest); State.els.dismissTilt?.addEventListener('click',()=>{ if(State.els.tiltPrompt) State.els.tiltPrompt.hidden=true; }); window.addEventListener('deviceorientation', onDeviceOrientation,true); initPointer(); initKeyboard(); setMouseGravityFromPoint((State.canvas?.clientWidth||0)/2,(State.canvas?.clientHeight||0)/2); }
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,5 +1,5 @@
-import type { SettingsType } from './config-types';
-import { PARTICLE_SIZE, X, Y, VX, VY, R } from './types';
+import type { SettingsType } from '../config/types';
+import { PARTICLE_SIZE, X, Y, VX, VY, R } from '../../types/types';
 
 export function handleBoundaries(particles: Float32Array, numParticles: number, settings: SettingsType, BW: number, BH: number) {
   const rest = settings.physics.restitution;
@@ -109,3 +109,18 @@ export function handleBoundaries(particles: Float32Array, numParticles: number, 
     }
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

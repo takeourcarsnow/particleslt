@@ -1,6 +1,6 @@
-import type { SettingsType } from './config-types';
-import { PARTICLE_SIZE, X, Y, VX, VY, R, M, INV_M, HEAT } from './types';
-import { neighbors } from './physics-grid';
+import type { SettingsType } from '../config/types';
+import { PARTICLE_SIZE, X, Y, VX, VY, R, M, INV_M, HEAT } from '../../types/types';
+import { neighbors } from './grid';
 
 export function handleCollisions(
   particles: Float32Array,
@@ -92,3 +92,19 @@ export function handleCollisions(
     }
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

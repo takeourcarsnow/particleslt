@@ -25,3 +25,15 @@ export function neighbors(i:number){
   }
   return res;
 }
+
+
+
+
+
+
+
+
+
+
+
+

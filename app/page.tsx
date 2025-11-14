@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect } from 'react';
-import { startSimulation } from '../src/sim/main';
+import { startSimulation } from '../src/sim/main/index';
 import { Dice6, Grid3X3, RotateCcw, HelpCircle, Smartphone, Clock, ArrowDown, Circle, Settings, Wind, RotateCw, Mouse, Palette, Square } from 'lucide-react';
 
 export default function Page(){

@@ -1,5 +1,5 @@
-import { SettingsSections } from './config-types';
-import { Settings } from './config-defaults';
+import { SettingsSections } from './types';
+import { Settings } from './defaults';
 
 export const PRESETS: Record<string, () => SettingsSections> = {
   Marbles: () => ({
@@ -758,3 +758,14 @@ export const PRESETS: Record<string, () => SettingsSections> = {
   })
 };
 export const EXTRA_PRESET_NOTES = 'Added presets: CalmVortex, JetBands, DenseSwarm, StormWells, PerformanceBoost, PerlinFlow, VortexClusters';
+
+
+
+
+
+
+
+
+
+
+

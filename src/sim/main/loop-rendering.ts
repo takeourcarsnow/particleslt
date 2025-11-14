@@ -1,6 +1,6 @@
-import { Settings } from './config';
-import { State } from './state';
-import { mapBoundaries } from './utils';
+import { Settings } from '../config/index';
+import { State } from '../state';
+import { mapBoundaries } from '../../utils/utils';
 
 export function drawContainerOutline(ctx: CanvasRenderingContext2D) {
   const BW = State.canvas!.width / State.DPR, BH = State.canvas!.height / State.DPR;
@@ -27,3 +27,19 @@ export function drawContainerOutline(ctx: CanvasRenderingContext2D) {
   }
   ctx.restore();
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

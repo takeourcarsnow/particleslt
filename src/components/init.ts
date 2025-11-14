@@ -1,8 +1,8 @@
-import { Settings, PRESETS } from './config';
-import { State } from './state';
-import { rand, randInt } from './utils';
-import { rebuildParticles } from './particles';
-import { TABS, showTab } from './ui-tabs';
+import { Settings, PRESETS } from '../sim/config/index';
+import { State } from '../sim/state';
+import { rand, randInt } from '../utils/utils';
+import { rebuildParticles } from '../sim/particles';
+import { TABS, showTab } from './tabs';
 
 // Function to create tabs
 export function makeTabs() {
@@ -107,3 +107,17 @@ export function initUI() {
   makeTabs();
   initHeaderButtons();
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+

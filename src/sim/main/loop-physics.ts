@@ -1,8 +1,8 @@
-import { Settings } from './config';
-import { State } from './state';
-import { mapBoundaries, DEG } from './utils';
-import { turbulenceForParticle } from './turbulence';
-import { buildGrid, neighbors } from './grid';
+import { Settings } from '../config/index';
+import { State } from '../state';
+import { mapBoundaries, DEG } from '../../utils/utils';
+import { turbulenceForParticle } from '../physics/turbulence';
+import { buildGrid, neighbors } from '../grid';
 
 export function simulatePhysicsStep(time: number, h: number) {
   const BW = State.canvas!.width / State.DPR, BH = State.canvas!.height / State.DPR;
@@ -259,3 +259,22 @@ export function handleBoundaries() {
     }
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

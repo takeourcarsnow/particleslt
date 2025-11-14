@@ -1,7 +1,7 @@
-import { Settings } from './config';
+import { Settings } from './config/index';
 import { State } from './state';
-import { clamp, rand, mapBoundaries } from './utils';
-import type { Particle } from './types';
+import { clamp, rand, mapBoundaries } from '../utils/utils';
+import type { Particle } from '../types/types';
 
 function massForRadius(r:number){
   switch(Settings.particles.massMode){
@@ -66,3 +66,15 @@ export function applyUniformRadius(){
   }
   State.gridCell = Math.max(8, (Settings.particles.radiusMax*2)|0);
 }
+
+
+
+
+
+
+
+
+
+
+
+

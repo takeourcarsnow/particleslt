@@ -1,5 +1,5 @@
-import { Settings } from './config';
-import { State } from './state';
+import { Settings } from '../sim/config/index';
+import { State } from '../sim/state';
 
 // Utility functions for UI controls
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -194,3 +194,17 @@ export function ctrlIconSelect(parent: HTMLElement, path: string, label: string,
   });
   wrap.appendChild(lab); wrap.appendChild(btns); parent.appendChild(wrap); return btns;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+

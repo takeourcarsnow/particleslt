@@ -1,5 +1,5 @@
-import type { Particle } from './types';
-import { PARTICLE_SIZE, X, Y, VX, VY, R, M, INV_M, HEAT } from './types';
+import type { Particle } from '../../types/types';
+import { PARTICLE_SIZE, X, Y, VX, VY, R, M, INV_M, HEAT } from '../../types/types';
 
 export function particlesToFloat32Array(particles: Particle[]): Float32Array {
   const numParticles = particles.length;
@@ -47,3 +47,18 @@ export function getMaxRadius(particles: Float32Array): number {
   }
   return maxRadius;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

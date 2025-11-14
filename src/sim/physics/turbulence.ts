@@ -1,6 +1,6 @@
-import { DEG, LCG } from './utils';
-import { curlNoise, flowNoiseVec } from './utils';
-import type { SettingsType } from './config-types';
+import { DEG, LCG } from '../../utils/utils';
+import { curlNoise, flowNoiseVec } from '../../utils/utils';
+import type { SettingsType } from '../config/types';
 
 // Helper used by main-thread physics (objects)
 export function turbulenceForParticle(
@@ -229,3 +229,20 @@ export function turbulenceForArray(
 
   return { ax, ay };
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

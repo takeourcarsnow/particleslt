@@ -1,6 +1,6 @@
-import { Settings } from './config';
-import { State } from './state';
-import { updateHUD } from './hud';
+import { Settings } from '../config/index';
+import { State } from '../state';
+import { updateHUD } from '../../components/hud';
 
 export function updatePerformanceMetrics(dtRaw: number) {
   const fps = 1 / Math.max(1e-6, dtRaw);
@@ -17,3 +17,19 @@ export function applyAdaptiveSettings() {
     updateHUD();
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

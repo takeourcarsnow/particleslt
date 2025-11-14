@@ -1,4 +1,4 @@
-import { State } from './state';
+import { State } from '../state';
 
 export function bindDOM() {
   State.canvas = document.getElementById('c') as HTMLCanvasElement;
@@ -41,3 +41,19 @@ export function bindDOM() {
   State.els.tiltBtnTop = get('enableTiltTop');
   State.els.dismissTilt = get('dismissTilt');
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

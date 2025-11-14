@@ -1,4 +1,4 @@
-import { SettingsType } from './config-types';
+import { SettingsType } from './types';
 
 const DEFAULTS: SettingsType = {
   particles: {
@@ -93,3 +93,13 @@ const DEFAULTS: SettingsType = {
 export const Config = { Settings: { ...DEFAULTS } };
 export { DEFAULTS };
 export const Settings = Config.Settings;
+
+
+
+
+
+
+
+
+
+

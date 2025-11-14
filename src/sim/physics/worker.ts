@@ -1,13 +1,13 @@
-import type { SettingsType } from './config-types';
-import { State } from './state';
-import { Particle, PARTICLE_SIZE } from './types';
-import { particlesToFloat32Array } from './physics-utils';
-import { precomputeNoiseFields } from './physics-noise';
-import { buildGrid, neighbors } from './physics-grid';
-import { computeWellsPositions, applyForces, applyIntegration } from './physics-forces';
-import { handleCollisions } from './physics-collisions';
-import { handleBoundaries } from './physics-boundaries';
-import { DEG, LCG, lerp, mapBoundaries } from './utils';
+import type { SettingsType } from '../config/types';
+import { State } from '../state';
+import { Particle, PARTICLE_SIZE } from '../../types/types';
+import { particlesToFloat32Array } from './utils';
+import { precomputeNoiseFields } from './noise';
+import { buildGrid, neighbors } from './grid';
+import { computeWellsPositions, applyForces, applyIntegration } from './forces';
+import { handleCollisions } from './collisions';
+import { handleBoundaries } from './boundaries';
+import { DEG, LCG, lerp, mapBoundaries } from '../../utils/utils';
 
 let settings: SettingsType;
 let state: typeof State;
@@ -76,3 +76,20 @@ onmessage = (e: MessageEvent) => {
       break;
   }
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

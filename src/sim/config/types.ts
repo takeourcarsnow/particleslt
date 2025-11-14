@@ -98,3 +98,12 @@ export type SettingsSections = {
   performance?: Partial<SettingsType['performance']>;
   controls?: Partial<SettingsType['controls']>;
 };
+
+
+
+
+
+
+
+
+

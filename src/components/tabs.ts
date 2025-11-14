@@ -1,8 +1,8 @@
-import { Settings } from './config';
-import { State } from './state';
-import { rebuildParticles } from './particles';
+import { Settings } from '../sim/config/index';
+import { State } from '../sim/state';
+import { rebuildParticles } from '../sim/particles';
 import { updateHUD } from './hud';
-import { ctrlRange, ctrlLogRange, ctrlSelect, ctrlColor, ctrlCheck, ctrlIconSelect, group, pathGet, pathSet } from './ui-controls';
+import { ctrlRange, ctrlLogRange, ctrlSelect, ctrlColor, ctrlCheck, ctrlIconSelect, group, pathGet, pathSet } from './controls';
 
 // Tab definitions
 interface TabDef { id: string; name: string; }
@@ -232,3 +232,17 @@ export function showTab(id: string) {
     contentEl.appendChild(g);
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+

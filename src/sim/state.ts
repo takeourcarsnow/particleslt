@@ -1,5 +1,5 @@
-import { Settings } from './config';
-import type { Particle, PointerState, HUDRefs, ElementRefs } from './types';
+import { Settings } from './config/index';
+import type { Particle, PointerState, HUDRefs, ElementRefs } from '../types/types';
 
 interface SimState {
   canvas: HTMLCanvasElement|null;
@@ -37,3 +37,15 @@ export const State: SimState = {
   currentTab: 'particles',
   groupStates: {}
 };
+
+
+
+
+
+
+
+
+
+
+
+
