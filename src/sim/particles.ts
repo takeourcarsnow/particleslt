@@ -36,8 +36,7 @@ function spawnPosFor(pRadius:number){
   }
 }
 function makeParticle():Particle{
-  const uniform = Settings.particles.uniformSize;
-  const r = uniform ? Settings.particles.radiusMax : rand(Settings.particles.radiusMin, Settings.particles.radiusMax);
+  const r = rand(Settings.particles.radiusMin, Settings.particles.radiusMin + Settings.particles.radiusRange);
   const m = massForRadius(r);
   const pos = spawnPosFor(r);
   return { x: pos.x, y: pos.y, vx: rand(-40,40), vy: rand(-40,40), r, m, invM: 1/m, heat:0, color: Settings.particles.solidColor };

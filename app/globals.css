@@ -33,12 +33,18 @@ canvas{position:fixed;inset:0;width:100vw;height:100vh;touch-action:none;display
 #content{flex:1;overflow:auto;padding:14px}
 .group{border:1px solid var(--border);border-radius:12px;padding:10px 10px;margin-bottom:12px;background:rgba(10,12,18,0.55)}
 .group h3{margin:0 0 8px 0;font-size:13px;letter-spacing:.2px;color:#a9b3c0}
+.group.collapsed .ctrl{display:none}
+.group.collapsed h3{margin:0}
 .ctrl{display:grid;grid-template-columns:1fr auto;gap:6px;align-items:center;margin:8px 0}
 .ctrl label{font-size:12px;color:#b4beca}
 .ctrl input[type="range"]{width:170px}
 .ctrl input[type="color"]{width:40px;height:28px;border:none;background:transparent}
 .ctrl select,.ctrl input[type="number"],.ctrl input[type="text"]{background:#0d1322;border:1px solid var(--border);color:var(--text);border-radius:8px;padding:6px 8px;min-width:140px}
 .ctrl .value{font-variant-numeric:tabular-nums;color:#cdd6e3;font-size:12px;}
+.icon-buttons{display:flex;gap:4px;flex-wrap:wrap}
+.icon-btn{background:#0d1322;border:1px solid var(--border);color:var(--text);border-radius:8px;padding:6px 8px;cursor:pointer;font-size:16px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;}
+.icon-btn:hover{border-color:#2a2f40}
+.icon-btn.active{background:linear-gradient(180deg,#18203a,#121a30);border-color:#2a2f40}
 .rowline{display:flex;gap:6px;flex-wrap:wrap}
 .smallnote{font-size:11px;color:#8c97a6}
 .footerNote{font-size:11px;color:#7e8796;margin-top:6px;text-align:center}

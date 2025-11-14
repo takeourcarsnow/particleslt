@@ -6,6 +6,15 @@ export function bindDOM() {
   if (!State.gl) {
     throw new Error('WebGL not supported');
   }
+  State.overlayCanvas = document.createElement('canvas');
+  State.overlayCanvas.id = 'overlay';
+  State.overlayCanvas.style.position = 'absolute';
+  State.overlayCanvas.style.top = '0';
+  State.overlayCanvas.style.left = '0';
+  State.overlayCanvas.style.pointerEvents = 'none';
+  State.overlayCanvas.style.zIndex = '10';
+  document.body.appendChild(State.overlayCanvas);
+  State.ctx = State.overlayCanvas.getContext('2d');
   const get = (id: string) => document.getElementById(id);
   State.hud.root = get('hud');
   State.hud.fps = get('fps');
@@ -28,6 +37,7 @@ export function bindDOM() {
   State.els.togglePanel = get('togglePanel');
   State.els.randomizeBtn = get('randomize');
   State.els.presetMenuBtn = get('presetMenu');
+  State.els.aboutBtn = get('aboutBtn') as HTMLButtonElement;
   State.els.tiltPrompt = get('tiltPrompt');
   State.els.tiltBtn = get('enableTilt');
   State.els.tiltBtnTop = get('enableTiltTop');

@@ -1,10 +1,11 @@
 import { SettingsType } from './config-types';
 
-export const Settings: SettingsType = {
+const DEFAULTS: SettingsType = {
   particles: {
     count: 1200,
     radiusMin: 2,
     radiusMax: 4,
+    radiusRange: 2,
     uniformSize: false,
     shape: 'circle',
     colorMode: 'velocity',
@@ -74,17 +75,21 @@ export const Settings: SettingsType = {
     background: '#0b0e14',
     showHUD: true,
     wireframe: false,
-    showContainer: true
+    showContainer: false
   },
   performance: {
     simSpeed: 1.0,
-    substeps: 3,
+    substeps: 8,
     adaptive: false,
     lowFpsThreshold: 45,
-    maxParticles: 8000,
-    collisionCap: 12
+    maxParticles: 4000,
+    collisionCap: 20
   },
   controls: {
     mouseSetsGravity: false
   }
 };
+
+export const Config = { Settings: { ...DEFAULTS } };
+export { DEFAULTS };
+export const Settings = Config.Settings;

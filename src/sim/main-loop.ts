@@ -6,6 +6,32 @@ import { computeWellsPositions } from './forces';
 import { drawParticles, clearBackground } from './renderer';
 import { updateHUD } from './hud';
 
+function drawContainerOutline(ctx: CanvasRenderingContext2D) {
+  const BW = State.canvas!.width / State.DPR, BH = State.canvas!.height / State.DPR;
+  const bMode = mapBoundaries(Settings.physics.boundaries);
+  ctx.save();
+  ctx.strokeStyle = 'rgba(106,227,255,0.6)';
+  ctx.lineWidth = 2;
+  if (bMode === 'container-circle') {
+    const cx = Settings.physics.container.cx * BW;
+    const cy = Settings.physics.container.cy * BH;
+    const R = Settings.physics.container.radiusN * (Math.min(BW, BH) / 2);
+    ctx.beginPath();
+    ctx.arc(cx, cy, R, 0, Math.PI * 2);
+    ctx.stroke();
+  } else if (bMode === 'container-square') {
+    const cx = Settings.physics.container.cx * BW;
+    const cy = Settings.physics.container.cy * BH;
+    const half = Settings.physics.container.sizeN * (Math.min(BW, BH) / 2);
+    const x = cx - half;
+    const y = cy - half;
+    const w = half * 2;
+    const h = half * 2;
+    ctx.strokeRect(x, y, w, h);
+  }
+  ctx.restore();
+}
+
 export function frame(t: number) {
   const dtRaw = Math.min(1 / 20, (t - State.lastT) / 1000) * Settings.performance.simSpeed;
   State.lastT = t;
@@ -155,106 +181,6 @@ export function frame(t: number) {
           const speed2 = p.vx * p.vx + p.vy * p.vy;
           p.heat = p.heat * State.heatDecay + Math.max(0, Math.min(0.05, speed2 * 0.000001));
         }
-        const e = Settings.physics.restitution;
-        const wf = Settings.physics.wallFriction;
-        if (bMode === 'screen-bounce') {
-          const BW2 = BW, BH2 = BH;
-          if (p.x < p.r) {
-            p.x = p.r;
-            if (p.vx < 0) {
-              const vt = p.vy;
-              p.vx = -p.vx * e;
-              p.vy = vt * (1 - wf);
-            }
-          } else if (p.x > BW2 - p.r) {
-            p.x = BW2 - p.r;
-            if (p.vx > 0) {
-              const vt = p.vy;
-              p.vx = -p.vx * e;
-              p.vy = vt * (1 - wf);
-            }
-          }
-          if (p.y < p.r) {
-            p.y = p.r;
-            if (p.vy < 0) {
-              const vt = p.vx;
-              p.vy = -p.vy * e;
-              p.vx = vt * (1 - wf);
-            }
-          } else if (p.y > BH2 - p.r) {
-            p.y = BH2 - p.r;
-            if (p.vy > 0) {
-              const vt = p.vx;
-              p.vy = -p.vy * e;
-              p.vx = vt * (1 - wf);
-            }
-          }
-        } else if (bMode === 'screen-wrap') {
-          if (p.x < -p.r) p.x = BW + p.r;
-          if (p.x > BW + p.r) p.x = -p.r;
-          if (p.y < -p.r) p.y = BH + p.r;
-          if (p.y > BH + p.r) p.y = -p.r;
-        } else if (bMode === 'container-circle') {
-          const cx = Settings.physics.container.cx * BW;
-          const cy = Settings.physics.container.cy * BH;
-          const R = Settings.physics.container.radiusN * (Math.min(BW, BH) / 2);
-          const dx = p.x - cx, dy = p.y - cy;
-          const dist = Math.hypot(dx, dy) || 1e-6;
-          const allow = Math.max(2, R - p.r);
-          if (dist > allow) {
-            const nx = dx / dist, ny = dy / dist;
-            p.x = cx + nx * allow;
-            p.y = cy + ny * allow;
-            const vn = p.vx * nx + p.vy * ny;
-            p.vx = p.vx - (1 + e) * vn * nx;
-            p.vy = p.vy - (1 + e) * vn * ny;
-            const tnx = -ny, tny = nx;
-            const vt = p.vx * tnx + p.vy * tny;
-            p.vx -= tnx * vt * wf;
-            p.vy -= tny * vt * wf;
-          }
-        } else if (bMode === 'container-square') {
-          const cx = Settings.physics.container.cx * BW;
-          const cy = Settings.physics.container.cy * BH;
-          const half = Settings.physics.container.sizeN * (Math.min(BW, BH) / 2);
-          const minX = cx - half + p.r, maxX = cx + half - p.r;
-          const minY = cy - half + p.r, maxY = cy + half - p.r;
-          if (p.x < minX) {
-            p.x = minX;
-            if (p.vx < 0) {
-              const vt = p.vy;
-              p.vx = -p.vx * e;
-              p.vy = vt * (1 - wf);
-            }
-          } else if (p.x > maxX) {
-            p.x = maxX;
-            if (p.vx > 0) {
-              const vt = p.vy;
-              p.vx = -p.vx * e;
-              p.vy = vt * (1 - wf);
-            }
-          }
-          if (p.y < minY) {
-            p.y = minY;
-            if (p.vy < 0) {
-              const vt = p.vx;
-              p.vy = -p.vy * e;
-              p.vx = vt * (1 - wf);
-            }
-          } else if (p.y > maxY) {
-            p.y = maxY;
-            if (p.vy > 0) {
-              const vt = p.vx;
-              p.vy = -p.vy * e;
-              p.vx = vt * (1 - wf);
-            }
-          }
-        } else {
-          if (p.x < -BW) p.x = BW * 2;
-          if (p.x > BW * 2) p.x = -BW;
-          if (p.y < -BH) p.y = BH * 2;
-          if (p.y > BH * 2) p.y = -BH;
-        }
       }
       if (Settings.collisions.enable && Settings.collisions.mode !== 'none') {
         const mode = Settings.collisions.mode;
@@ -271,8 +197,21 @@ export function frame(t: number) {
             const dx = q.x - p.x, dy = q.y - p.y;
             const sr = p.r + q.r;
             if (dx * dx + dy * dy <= sr * sr) {
-              const d = Math.sqrt(dx * dx + dy * dy) || 1e-4;
-              const nx = dx / d, ny = dy / d;
+              let d = Math.sqrt(dx * dx + dy * dy);
+              // If particles are exactly on top of each other (d == 0) or extremely close,
+              // use a small random separation direction. Otherwise nx/ny will be 0 and
+              // positional correction won't separate them which can lead to instability.
+              let nx: number, ny: number;
+              if (d < 1e-4) {
+                // Small random unit vector
+                nx = (Math.random() * 2 - 1);
+                ny = (Math.random() * 2 - 1);
+                const l = Math.hypot(nx, ny) || 1e-4;
+                nx /= l; ny /= l;
+                d = 1e-4; // avoid division by zero downstream
+              } else {
+                nx = dx / d; ny = dy / d;
+              }
               const overlap = sr - d;
               if (mode === 'soft') {
                 const k = Settings.collisions.softness;
@@ -327,9 +266,115 @@ export function frame(t: number) {
           }
         }
       }
+      const rest = Settings.physics.restitution;
+      const wf = Settings.physics.wallFriction;
+      const containerRest = rest;
+      for (let i = 0; i < State.particles.length; i++) {
+        const p = State.particles[i];
+        if (bMode === 'screen-bounce') {
+          const BW2 = BW, BH2 = BH;
+          if (p.x < p.r) {
+            p.x = p.r;
+            if (p.vx < 0) {
+              const vt = p.vy;
+              p.vx = -p.vx * rest;
+              p.vy = vt * (1 - wf);
+            }
+          } else if (p.x > BW2 - p.r) {
+            p.x = BW2 - p.r;
+            if (p.vx > 0) {
+              const vt = p.vy;
+              p.vx = -p.vx * rest;
+              p.vy = vt * (1 - wf);
+            }
+          }
+          if (p.y < p.r) {
+            p.y = p.r;
+            if (p.vy < 0) {
+              const vt = p.vx;
+              p.vy = -p.vy * rest;
+              p.vx = vt * (1 - wf);
+            }
+          } else if (p.y > BH2 - p.r) {
+            p.y = BH2 - p.r;
+            if (p.vy > 0) {
+              const vt = p.vx;
+              p.vy = -p.vy * rest;
+              p.vx = vt * (1 - wf);
+            }
+          }
+        } else if (bMode === 'screen-wrap') {
+          if (p.x < -p.r) p.x = BW + p.r;
+          if (p.x > BW + p.r) p.x = -p.r;
+          if (p.y < -p.r) p.y = BH + p.r;
+          if (p.y > BH + p.r) p.y = -p.r;
+        } else if (bMode === 'container-circle') {
+          const cx = Settings.physics.container.cx * BW;
+          const cy = Settings.physics.container.cy * BH;
+          const R = Settings.physics.container.radiusN * (Math.min(BW, BH) / 2);
+          const dx = p.x - cx, dy = p.y - cy;
+          const dist = Math.hypot(dx, dy) || 1e-6;
+          const allow = Math.max(2, R - p.r);
+          if (dist > allow) {
+            const nx = dx / dist, ny = dy / dist;
+            p.x = cx + nx * allow;
+            p.y = cy + ny * allow;
+            const vn = p.vx * nx + p.vy * ny;
+            p.vx = p.vx - (1 + containerRest) * vn * nx;
+            p.vy = p.vy - (1 + containerRest) * vn * ny;
+            const tnx = -ny, tny = nx;
+            const vt = p.vx * tnx + p.vy * tny;
+            p.vx -= tnx * vt * wf;
+            p.vy -= tny * vt * wf;
+          }
+        } else if (bMode === 'container-square') {
+          const cx = Settings.physics.container.cx * BW;
+          const cy = Settings.physics.container.cy * BH;
+          const half = Settings.physics.container.sizeN * (Math.min(BW, BH) / 2);
+          const minX = cx - half + p.r, maxX = cx + half - p.r;
+          const minY = cy - half + p.r, maxY = cy + half - p.r;
+          if (p.x < minX) {
+            p.x = minX;
+            if (p.vx < 0) {
+              const vt = p.vy;
+              p.vx = -p.vx * containerRest;
+              p.vy = vt * (1 - wf);
+            }
+          } else if (p.x > maxX) {
+            p.x = maxX;
+            if (p.vx > 0) {
+              const vt = p.vy;
+              p.vx = -p.vx * containerRest;
+              p.vy = vt * (1 - wf);
+            }
+          }
+          if (p.y < minY) {
+            p.y = minY;
+            if (p.vy < 0) {
+              const vt = p.vx;
+              p.vy = -p.vy * containerRest;
+              p.vx = vt * (1 - wf);
+            }
+          } else if (p.y > maxY) {
+            p.y = maxY;
+            if (p.vy > 0) {
+              const vt = p.vx;
+              p.vy = -p.vy * containerRest;
+              p.vx = vt * (1 - wf);
+            }
+          }
+        } else {
+          if (p.x < -BW) p.x = BW * 2;
+          if (p.x > BW * 2) p.x = -BW;
+          if (p.y < -BH) p.y = BH * 2;
+          if (p.y > BH * 2) p.y = -BH;
+        }
+      }
     }
   }
   drawParticles(State.particles);
+  State.ctx!.clearRect(0, 0, State.canvas!.width / State.DPR, State.canvas!.height / State.DPR);
+  if (Settings.visuals.showContainer) drawContainerOutline(State.ctx!);
   // drawContainerOutline(State.ctx!);
   // State.ctx!.globalCompositeOperation = 'source-over';
   // State.ctx!.strokeStyle = 'rgba(106,227,255,0.6)';

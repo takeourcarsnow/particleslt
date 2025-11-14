@@ -1,6 +1,7 @@
-import { Settings } from './config';
+import { Config, DEFAULTS, Settings } from './config';
 import { State } from './state';
 import { rebuildParticles } from './particles';
+import { showTab } from './ui-tabs';
 
 export function updateHUD(){
   if(!State.hud.collMode) return; // not bound yet
@@ -45,7 +46,7 @@ function updateFullscreenBtn(){ const btn = State.hud.fullscreenBtn; if(!btn) re
 export function initHUD(){
   State.hud.pauseBtn?.addEventListener('click', ()=>{ State.running=!State.running; if(State.hud.pauseBtn) State.hud.pauseBtn.textContent = State.running?'Pause':'Resume'; });
   State.hud.stepBtn?.addEventListener('click', ()=>{ State.stepOnce=true; State.running=false; if(State.hud.pauseBtn) State.hud.pauseBtn.textContent='Resume'; });
-  State.hud.resetBtn?.addEventListener('click', ()=>{ rebuildParticles(false); });
+  State.hud.resetBtn?.addEventListener('click', ()=>{ Config.Settings = { ...DEFAULTS }; rebuildParticles(false); showTab(State.currentTab); updateHUD(); });
   State.hud.fullscreenBtn?.addEventListener('click', ()=>{ if(!isFullscreen()) requestFullscreen(document.documentElement); else exitFullscreen(); });
   document.addEventListener('fullscreenchange', updateFullscreenBtn); document.addEventListener('webkitfullscreenchange', updateFullscreenBtn); updateFullscreenBtn();
   if(State.hud.gravityVal){ State.hud.gravityVal.title='Click to set gravity'; State.hud.gravityVal.style.cursor='pointer'; State.hud.gravityVal.addEventListener('click', ()=>{ const val = prompt('Set gravity (0-1200):', String(Settings.physics.gravity)); if(val!==null){ const g = Math.max(0, Math.min(1200, parseFloat(val))); Settings.physics.gravity=g; updateHUD(); }}); }

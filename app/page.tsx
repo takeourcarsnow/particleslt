@@ -32,11 +32,36 @@ export default function Page(){
 
       <div id="panel">
         <div id="panelHeader">
-          <div className="title">Particle Tilt Playground</div>
+          <div className="title">Settings</div>
           <div className="actions">
-            <button id="enableTiltTop" className="primary">Enable Tilt</button>
-            <button id="randomize">Randomize</button>
-            <button id="presetMenu">Presets</button>
+            <button id="enableTiltTop" className="icon-btn primary" title="Enable Tilt">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/>
+                <path d="M21 3v5h-5"/>
+                <path d="M3 12a9 9 0 0 1 9-9c2.52 0 4.93 1 6.74 2.74L21 8"/>
+              </svg>
+            </button>
+            <button id="randomize" className="icon-btn" title="Randomize">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                <circle cx="12" cy="12" r="1.5"/>
+              </svg>
+            </button>
+            <button id="presetMenu" className="icon-btn" title="Presets">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polygon points="12,2 22,8.5 22,15.5 12,22 2,15.5 2,8.5"/>
+                <polyline points="22,8.5 12,15.5 2,8.5"/>
+                <polyline points="2,15.5 12,22 22,15.5"/>
+                <polyline points="12,2 12,15.5"/>
+              </svg>
+            </button>
+            <button id="aboutBtn" className="icon-btn" title="About">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                <path d="M12 17h.01"/>
+              </svg>
+            </button>
           </div>
         </div>
         <div id="tabs"></div>

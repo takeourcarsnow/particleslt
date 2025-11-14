@@ -3,6 +3,7 @@ export interface SettingsType {
     count: number;
     radiusMin: number;
     radiusMax: number;
+    radiusRange: number;
     uniformSize: boolean;
     shape: 'circle' | 'square' | 'triangle';
     colorMode: 'solid' | 'velocity' | 'heat';
@@ -87,7 +88,7 @@ export interface SettingsType {
   };
 }
 
-export type SettingsSections = Partial<SettingsType> & {
+export type SettingsSections = {
   particles?: Partial<SettingsType['particles']>;
   physics?: Partial<SettingsType['physics']>;
   collisions?: Partial<SettingsType['collisions']>;
