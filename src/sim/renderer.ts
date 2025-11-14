@@ -130,9 +130,12 @@ export function initRenderer() {
   aInstanceRadius = gl.getAttribLocation(program, 'aInstanceRadius');
   aInstanceColor = gl.getAttribLocation(program, 'aInstanceColor');
 
-  uResolution = gl.getUniformLocation(program, 'uResolution')!;
-  uShape = gl.getUniformLocation(program, 'uShape')!;
-  uWireframe = gl.getUniformLocation(program, 'uWireframe')!;
+  uResolution = gl.getUniformLocation(program, 'uResolution');
+  if (!uResolution) throw new Error('Uniform uResolution not found');
+  uShape = gl.getUniformLocation(program, 'uShape');
+  if (!uShape) throw new Error('Uniform uShape not found');
+  uWireframe = gl.getUniformLocation(program, 'uWireframe');
+  if (!uWireframe) throw new Error('Uniform uWireframe not found');
 
   gl.enable(gl.BLEND);
   setBlendMode();
@@ -173,6 +176,7 @@ function applyOpacityToColor(col: string, alpha: number): [number, number, numbe
 export function drawParticles(particles: Particle[]) {
   if (!particles.length) return;
 
+  gl.useProgram(program);
   setBlendMode();
 
   const instanceData: number[] = [];
@@ -190,7 +194,7 @@ export function drawParticles(particles: Particle[]) {
       color = applyOpacityToColor(col, opacity);
     } else if (cm === 'heat') {
       const t = clamp(p.heat, 0, 1);
-      const col = paletteColor(t, 'fire');
+      const col = paletteColor(t, Settings.particles.palette);
       color = applyOpacityToColor(col, opacity);
     } else {
       color = [1, 1, 1, opacity];

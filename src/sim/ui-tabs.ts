@@ -2,7 +2,7 @@ import { Settings } from './config';
 import { State } from './state';
 import { rebuildParticles } from './particles';
 import { updateHUD } from './hud';
-import { ctrlRange, ctrlSelect, ctrlColor, ctrlCheck, ctrlIconSelect, group } from './ui-controls';
+import { ctrlRange, ctrlLogRange, ctrlSelect, ctrlColor, ctrlCheck, ctrlIconSelect, group, pathGet, pathSet } from './ui-controls';
 
 // Tab definitions
 interface TabDef { id: string; name: string; }
@@ -19,9 +19,71 @@ export function showTab(id: string) {
   const contentEl = State.els.contentEl!; contentEl.innerHTML = '';
   if (id === 'basics') {
     const g1 = group('Particle Basics', true);
-    ctrlRange(g1, 'particles.count', 'Count', 0, Settings.performance.maxParticles, 1, v => v.toString(), () => rebuildParticles(true));
-    ctrlRange(g1, 'particles.radiusMin', 'Size', 0.5, 12, 0.5, v => v.toFixed(1), () => { Settings.particles.radiusMax = Settings.particles.radiusMin + Settings.particles.radiusRange; rebuildParticles(true); });
-    ctrlRange(g1, 'particles.radiusRange', 'Size difference', 0, 10, 0.5, v => v.toFixed(1), () => { Settings.particles.radiusMax = Settings.particles.radiusMin + Settings.particles.radiusRange; rebuildParticles(true); });
+    // Custom count slider: first half 0-500, second half 500-maxParticles
+    const countWrap = document.createElement('div'); countWrap.className = 'ctrl';
+    const countLab = document.createElement('label'); countLab.textContent = 'Count';
+    const countRight = document.createElement('div'); countRight.className = 'rowline'; countRight.style.position = 'relative';
+    const countInput = document.createElement('input'); countInput.type = 'range'; countInput.min = '0'; countInput.max = '200'; countInput.step = '1';
+    const countTooltip = document.createElement('div'); countTooltip.style.position = 'absolute'; countTooltip.style.display = 'none'; countTooltip.style.background = '#333'; countTooltip.style.color = '#fff'; countTooltip.style.padding = '2px 4px'; countTooltip.style.borderRadius = '3px'; countTooltip.style.fontSize = '12px'; countTooltip.style.pointerEvents = 'none'; countTooltip.style.zIndex = '10'; countTooltip.style.top = '-25px';
+    
+    const maxParticles = Settings.performance.maxParticles;
+    const halfSlider = 100;
+    const firstHalfMax = 500;
+    
+    // Function to get actual count from slider value
+    const sliderToCount = (sliderVal: number) => {
+      if (sliderVal <= halfSlider) {
+        return (sliderVal / halfSlider) * firstHalfMax;
+      } else {
+        return firstHalfMax + ((sliderVal - halfSlider) / halfSlider) * (maxParticles - firstHalfMax);
+      }
+    };
+    
+    // Function to get slider value from count
+    const countToSlider = (count: number) => {
+      if (count <= firstHalfMax) {
+        return (count / firstHalfMax) * halfSlider;
+      } else {
+        return halfSlider + ((count - firstHalfMax) / (maxParticles - firstHalfMax)) * halfSlider;
+      }
+    };
+    
+    // Set initial value
+    const initialCount = pathGet(Settings, 'particles.count');
+    countInput.value = String(Math.round(countToSlider(initialCount)));
+    countInput.title = Math.round(initialCount).toString();
+    
+    countInput.addEventListener('input', () => {
+      const sliderVal = parseFloat(countInput.value);
+      const actualCount = sliderToCount(sliderVal);
+      pathSet(Settings, 'particles.count', actualCount);
+      countTooltip.textContent = Math.round(actualCount).toString();
+      const percent = (sliderVal / 200) * 100;
+      countTooltip.style.left = `calc(${percent}% - 10px)`;
+      countTooltip.style.display = 'block';
+      rebuildParticles(true);
+    });
+    
+    countInput.addEventListener('mousedown', () => {
+      const sliderVal = parseFloat(countInput.value);
+      const actualCount = sliderToCount(sliderVal);
+      countTooltip.textContent = Math.round(actualCount).toString();
+      const percent = (sliderVal / 200) * 100;
+      countTooltip.style.left = `calc(${percent}% - 10px)`;
+      countTooltip.style.display = 'block';
+    });
+    
+    countInput.addEventListener('mouseup', () => {
+      countTooltip.style.display = 'none';
+    });
+    
+    countInput.addEventListener('mouseleave', () => {
+      countTooltip.style.display = 'none';
+    });
+    
+    countRight.appendChild(countInput); countRight.appendChild(countTooltip); countWrap.appendChild(countLab); countWrap.appendChild(countRight); g1.appendChild(countWrap);
+    ctrlRange(g1, 'particles.radiusMin', 'Size', 0.5, 8, 0.25, v => v.toFixed(1), () => { Settings.particles.radiusMax = Settings.particles.radiusMin + Settings.particles.radiusRange; rebuildParticles(true); });
+    ctrlRange(g1, 'particles.radiusRange', 'Size difference', 0, 6, 0.25, v => v.toFixed(1), () => { Settings.particles.radiusMax = Settings.particles.radiusMin + Settings.particles.radiusRange; rebuildParticles(true); });
     ctrlIconSelect(g1, 'particles.shape', 'Shape', [
       { value: 'circle', name: 'Circle', iconName: 'circle' },
       { value: 'square', name: 'Square', iconName: 'square' },
@@ -98,22 +160,16 @@ export function showTab(id: string) {
     const mode = Settings.forces.turbulenceMode;
     const g = group('Turbulence', true);
     ctrlSelect(g, 'forces.turbulenceMode', 'Mode', [
-      { value: 'none', name: 'None' }, { value: 'flow', name: 'Flow' }, { value: 'curl', name: 'Curl' }, { value: 'vortex', name: 'Vortex (single)' }, { value: 'wind', name: 'Wind (gusty)' }, { value: 'jets', name: 'Jets (banded)' }, { value: 'swirlgrid', name: 'Swirl Grid' }, { value: 'wells', name: 'Wells (multi-attractor)' }
+      { value: 'none', name: 'None' }, { value: 'vortex', name: 'Vortex' }, { value: 'jets', name: 'Jets' }, { value: 'swirlgrid', name: 'Swirl Grid' }, { value: 'wells', name: 'Wells' }, { value: 'perlin', name: 'Perlin Flow' }, { value: 'clusters', name: 'Vortex Clusters' }, { value: 'waves', name: 'Harmonic Waves' }
     ], () => showTab('dynamics'));
     if (mode !== 'none') {
       ctrlRange(g, 'forces.amplitude', 'Amplitude', 0, 300, 1, v => v.toFixed(0));
-      ctrlRange(g, 'forces.scale', 'Scale', 0.0005, 0.02, 0.0005, v => v.toFixed(4));
+      ctrlRange(g, 'forces.scale', 'Scale', 0.0005, 0.02, 0.001, v => v.toFixed(4));
       ctrlRange(g, 'forces.timeScale', 'Time scale', 0, 2, 0.01, v => v.toFixed(2));
     }
     contentEl.append(g);
-    if (mode === 'curl') {
-      const g2 = group('Curl options'); ctrlRange(g2, 'forces.curlStrength', 'Curl strength', 0, 3, 0.05, v => v.toFixed(2)); contentEl.append(g2);
-    }
     if (mode === 'vortex') {
       const g3 = group('Vortex options'); ctrlRange(g3, 'forces.vortexX', 'Center X (norm)', 0, 1, 0.01, v => v.toFixed(2)); ctrlRange(g3, 'forces.vortexY', 'Center Y (norm)', 0, 1, 0.01, v => v.toFixed(2)); ctrlRange(g3, 'forces.vortexStrength', 'Strength', 0, 2000, 10, v => v.toFixed(0)); ctrlRange(g3, 'forces.vortexFalloff', 'Falloff', 0, 3, 0.05, v => v.toFixed(2)); ctrlCheck(g3, 'forces.vortexCW', 'Clockwise'); contentEl.append(g3);
-    }
-    if (mode === 'wind') {
-      const g4 = group('Wind options'); ctrlRange(g4, 'forces.windVar', 'Variability', 0, 200, 1, v => v.toFixed(0)); ctrlRange(g4, 'forces.windGust', 'Gust', 0, 400, 1, v => v.toFixed(0)); contentEl.append(g4);
     }
     if (mode === 'jets') {
       const g5 = group('Jets options'); ctrlRange(g5, 'forces.jetsAngle', 'Angle (deg)', 0, 360, 1, v => v.toFixed(0)); ctrlRange(g5, 'forces.jetsSpacing', 'Band spacing (px)', 30, 400, 1, v => v.toFixed(0)); contentEl.append(g5);
@@ -163,7 +219,6 @@ export function showTab(id: string) {
     }
     const g3 = group('Gravity Control');
     ctrlCheck(g3, 'controls.mouseSetsGravity', 'Mouse sets gravity', () => updateHUD());
-    const hint = document.createElement('div'); hint.className = 'smallnote'; hint.textContent = 'Click anywhere to tilt toward that point (sticky).'; g3.appendChild(hint);
     contentEl.append(g, g2, g3);
   }
   if (id === 'performance') {

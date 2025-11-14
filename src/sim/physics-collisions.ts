@@ -29,13 +29,11 @@ export function handleCollisions(
         // use a small random separation direction. Otherwise nx/ny will be 0 and
         // positional correction won't separate them which can lead to instability.
         let nx: number, ny: number;
-        if (d < 1e-4) {
-          // Small random unit vector
-          nx = (Math.random() * 2 - 1);
-          ny = (Math.random() * 2 - 1);
-          const l = Math.hypot(nx, ny) || 1e-4;
-          nx /= l; ny /= l;
-          d = 1e-4; // avoid division by zero downstream
+        if (d < 1e-3) {
+          // Small fixed unit vector
+          nx = 1;
+          ny = 0;
+          d = 1e-3; // avoid division by zero downstream
         } else {
           nx = dx / d; ny = dy / d;
         }
@@ -66,7 +64,7 @@ export function handleCollisions(
           if (vn < 0) {
             const e2 = rest;
             const invMassSum = 1 / particles[base + M] + 1 / particles[qbase + M];
-            const jimp = -(1 + e2) * vn / invMassSum;
+            const jimp = Math.max(-100, Math.min(100, -(1 + e2) * vn / invMassSum));
             const ix = nx * jimp, iy = ny * jimp;
             particles[base + VX] -= ix * particles[base + INV_M];
             particles[base + VY] -= iy * particles[base + INV_M];
@@ -74,7 +72,7 @@ export function handleCollisions(
             particles[qbase + VY] += iy * particles[qbase + INV_M];
             const fr = settings.physics.particleFriction;
             const tvx = rvx - vn * nx, tvy = rvy - vn * ny;
-            const tlen = Math.hypot(tvx, tvy) || 1e-6;
+            const tlen = Math.hypot(tvx, tvy) || 1e-4;
             const tx = tlen ? tvx / tlen : 0, ty = tlen ? tvy / tlen : 0;
             const jt = -fr * jimp;
             particles[base + VX] -= tx * jt * particles[base + INV_M];

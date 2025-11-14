@@ -27,8 +27,6 @@ export function bindDOM() {
   State.hud.shapeMode = get('shapeMode');
   State.hud.colorMode = get('colorMode');
   State.hud.boundMode = get('boundMode');
-  State.hud.pauseBtn = get('pauseBtn') as HTMLButtonElement;
-  State.hud.stepBtn = get('stepBtn') as HTMLButtonElement;
   State.hud.resetBtn = get('resetBtn') as HTMLButtonElement;
   State.hud.fullscreenBtn = get('fullscreenBtn') as HTMLButtonElement;
   State.els.panel = get('panel');

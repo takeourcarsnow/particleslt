@@ -37,7 +37,7 @@ export function initHeaderButtons() {
     Settings.physics.airDrag = rand(0.01, 0.4);
     Settings.physics.restitution = rand(0.1, 0.9);
     Settings.collisions.mode = ['elastic', 'soft', 'inelastic', 'none'][randInt(0, 3)] as typeof Settings.collisions.mode;
-    Settings.forces.turbulenceMode = ['none', 'flow', 'curl', 'vortex', 'wind', 'jets', 'swirlgrid', 'wells'][randInt(0, 7)];
+    Settings.forces.turbulenceMode = ['none', 'vortex', 'jets', 'swirlgrid', 'wells', 'perlin', 'clusters', 'waves'][randInt(0, 7)];
     Settings.forces.amplitude = rand(0, 800);
     Settings.forces.scale = rand(0.001, 0.008);
     Settings.forces.timeScale = rand(0, 1.2);

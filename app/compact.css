@@ -1,0 +1,37 @@
+/* Compact UI overrides to make the menu much smaller */
+:root{
+  --panel-width: 320px;
+}
+/* Panel */
+#panel{width:min(var(--panel-width),92vw)!important;right:8px;top:8px;bottom:8px;border-radius:8px;padding:0}
+#panelHeader{padding:6px 8px}
+#panelHeader .title{font-size:13px}
+#panelHeader button{padding:5px 6px;font-size:12px}
+/* Tabs */
+#tabs{padding:6px 6px;gap:6px}
+#tabs button{padding:4px 7px;font-size:11px}
+#content{padding:8px}
+.group{padding:6px;margin-bottom:8px;border-radius:8px}
+.group h3{font-size:12px;margin-bottom:6px}
+.ctrl{margin:6px 0;gap:6px}
+.ctrl input[type="range"]{width:110px}
+.ctrl select,.ctrl input[type="number"],.ctrl input[type="text"]{min-width:100px;padding:4px 6px;font-size:12px}
+.icon-btn{width:26px;height:26px;padding:3px;font-size:13px}
+#togglePanel{left:8px;bottom:8px;padding:6px 8px}
+/* Reduce spacing in HUD */
+#hud{padding:6px 8px;font-size:11px}
+/* Reduce overall font slightly */
+html,body{font-size:13px}
+
+/* Make active icon buttons use accent color for the icon itself */
+.icon-btn.active{color:var(--accent)}
+/* If the SVG uses fill="none" (outline icons), color the stroke only; for filled icons color the fill.
+   Do NOT change the button border so the border remains consistent when active. */
+.icon-btn.active svg[fill="none"], .icon-btn.active svg[fill="none"] *{
+  stroke:var(--accent) !important;
+  fill:none !important;
+}
+.icon-btn.active svg:not([fill="none"]), .icon-btn.active svg:not([fill="none"]) *{
+  fill:var(--accent) !important;
+  stroke:var(--accent) !important;
+}

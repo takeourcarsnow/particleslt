@@ -51,7 +51,7 @@ export function handleBoundaries(particles: Float32Array, numParticles: number, 
       const cy = settings.physics.container.cy * BH;
       const R = settings.physics.container.radiusN * (Math.min(BW, BH) / 2);
       const dx = particles[base + X] - cx, dy = particles[base + Y] - cy;
-      const dist = Math.hypot(dx, dy) || 1e-6;
+      const dist = Math.hypot(dx, dy) || 1e-4;
       const allow = Math.max(2, R - particles[base + R]);
       if (dist > allow) {
         const nx = dx / dist, ny = dy / dist;

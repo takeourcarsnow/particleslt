@@ -1,8 +1,8 @@
 import { Settings } from './config';
 import { State } from './state';
-import { mapBoundaries, curlNoise, flowNoiseVec, DEG } from './utils';
+import { mapBoundaries, DEG } from './utils';
+import { turbulenceForParticle } from './turbulence';
 import { buildGrid, neighbors } from './grid';
-import { computeWellsPositions } from './forces';
 
 export function simulatePhysicsStep(time: number, h: number) {
   const BW = State.canvas!.width / State.DPR, BH = State.canvas!.height / State.DPR;
@@ -13,7 +13,7 @@ export function simulatePhysicsStep(time: number, h: number) {
   const tscale = Settings.forces.timeScale;
   const tt = time * tscale;
   const ptrActive = Settings.pointer.enabled && State.pointer.active;
-  const wells = tm === 'wells' ? computeWellsPositions(time) : null;
+  // wells positions are computed inside the turbulence helper for the main-thread path
 
   for (let i = 0; i < State.particles.length; i++) {
     const p = State.particles[i];
@@ -22,76 +22,11 @@ export function simulatePhysicsStep(time: number, h: number) {
     let ax = axBase;
     let ay = ayBase;
 
-    if (tm === 'flow') {
-      const v = flowNoiseVec(p.x, p.y, tt, sca, amp * p.invM);
-      ax += v.x;
-      ay += v.y;
-    } else if (tm === 'curl') {
-      const v = curlNoise(p.x, p.y, tt, sca, amp * Settings.forces.curlStrength * p.invM);
-      ax += v.x;
-      ay += v.y;
-    } else if (tm === 'vortex') {
-      const cx = Settings.forces.vortexX * BW;
-      const cy = Settings.forces.vortexY * BH;
-      const dx = p.x - cx, dy = p.y - cy;
-      const r2 = dx * dx + dy * dy;
-      const r = Math.sqrt(r2) + 1e-4;
-      const strength = Settings.forces.vortexStrength / Math.pow(r, Settings.forces.vortexFalloff);
-      let tx = -dy / r, ty = dx / r;
-      if (!Settings.forces.vortexCW) { tx = -tx; ty = -ty; }
-      ax += tx * strength * p.invM;
-      ay += ty * strength * p.invM;
-      const cent = amp * 0.1 * p.invM;
-      ax += -dx / r * cent;
-      ay += -dy / r * cent;
-    } else if (tm === 'wind') {
-      const v = flowNoiseVec(p.x * 0.7, p.y * 0.7, tt, sca * 0.6, (Settings.forces.windVar || 0));
-      const gust = flowNoiseVec(p.x * 0.3, p.y * 0.3, tt * 1.7, sca * 0.4, (Settings.forces.windGust || 0));
-      ax += (v.x + gust.x) * p.invM;
-      ay += (v.y + gust.y) * p.invM;
-    } else if (tm === 'jets') {
-      const ang = Settings.forces.jetsAngle * DEG;
-      const ux = Math.cos(ang), uy = Math.sin(ang);
-      const phi = ((p.x * ux + p.y * uy) / Math.max(10, Settings.forces.jetsSpacing)) * Math.PI * 2 + tt * 2.0;
-      const band = Math.sin(phi);
-      const F = amp * band * p.invM;
-      ax += ux * F;
-      ay += uy * F;
-    } else if (tm === 'swirlgrid') {
-      const spacing = Math.max(20, Settings.forces.swirlSpacing);
-      const cxg = Math.floor(p.x / spacing) * spacing + spacing * 0.5;
-      const cyg = Math.floor(p.y / spacing) * spacing + spacing * 0.5;
-      const dx = p.x - cxg, dy = p.y - cyg;
-      const r = Math.hypot(dx, dy) + 1e-3;
-      let cw = Settings.forces.vortexCW ? 1 : -1;
-      if (Settings.forces.swirlAlt) {
-        const px = Math.floor(p.x / spacing), py = Math.floor(p.y / spacing);
-        if (((px + py) & 1) === 1) cw = -cw;
-      }
-      const tx = (-dy / r) * cw, ty = (dx / r) * cw;
-      const fall = 1 / Math.pow(1 + (r / spacing), Settings.forces.swirlFalloff);
-      const F = amp * fall * p.invM;
-      ax += tx * F;
-      ay += ty * F;
-    } else if (tm === 'wells' && wells) {
-      const falloff = Settings.forces.wellsFalloff;
-      const k = Settings.forces.wellsStrength;
-      for (let w = 0; w < wells.length; w++) {
-        const wx = wells[w].x, wy = wells[w].y;
-        const dx = wx - p.x, dy = wy - p.y;
-        const r = Math.hypot(dx, dy) + 1e-3;
-        const nx = dx / r, ny = dy / r;
-        const sgn = Settings.forces.wellsRepel ? -1 : 1;
-        const base = k / Math.pow(r, falloff);
-        ax += nx * base * sgn * p.invM;
-        ay += ny * base * sgn * p.invM;
-        const cw = (w % 2 === 0 ? 1 : -1);
-        const tx = -ny * cw, ty = nx * cw;
-        const spin = Settings.forces.wellsSpin * base * p.invM;
-        ax += tx * spin;
-        ay += ty * spin;
-      }
-    }
+    // centralized turbulence computation
+    const turb = turbulenceForParticle(p.x, p.y, tt, tm, Object.assign({}, Settings, { canvasW: BW, canvasH: BH }));
+    // turbulenceForParticle returns per-mass-free values; apply inverse mass
+    ax += turb.x * p.invM;
+    ay += turb.y * p.invM;
 
     if (ptrActive && Settings.pointer.tool !== 'none') {
       const dx = p.x - State.pointer.x;
@@ -99,7 +34,7 @@ export function simulatePhysicsStep(time: number, h: number) {
       const d2 = dx * dx + dy * dy;
       const rr = Settings.pointer.radius;
       if (d2 < rr * rr) {
-        const d = Math.sqrt(d2) + 1e-4;
+        const d = Math.sqrt(d2) + 1e-3;
         const nx = dx / d, ny = dy / d;
         const fall = 1 - d / rr;
         const F = Settings.pointer.strength * fall * fall * p.invM;
@@ -120,8 +55,14 @@ export function simulatePhysicsStep(time: number, h: number) {
     }
 
     const drag = Settings.physics.airDrag;
+    // Clamp accelerations to prevent extreme forces
+    ax = Math.max(-500, Math.min(500, ax));
+    ay = Math.max(-500, Math.min(500, ay));
     p.vx += (ax - p.vx * drag) * h;
     p.vy += (ay - p.vy * drag) * h;
+    // Clamp velocities to prevent runaway
+    p.vx = Math.max(-1000, Math.min(1000, p.vx));
+    p.vy = Math.max(-1000, Math.min(1000, p.vy));
     p.x += p.vx * h;
     p.y += p.vy * h;
     if (Settings.particles.colorMode === 'heat') {
@@ -148,12 +89,10 @@ export function handleCollisions() {
       if (dx * dx + dy * dy <= sr * sr) {
         let d = Math.sqrt(dx * dx + dy * dy);
         let nx: number, ny: number;
-        if (d < 1e-4) {
-          nx = (Math.random() * 2 - 1);
-          ny = (Math.random() * 2 - 1);
-          const l = Math.hypot(nx, ny) || 1e-4;
-          nx /= l; ny /= l;
-          d = 1e-4;
+        if (d < 1e-3) {
+          nx = 1;
+          ny = 0;
+          d = 1e-3;
         } else {
           nx = dx / d; ny = dy / d;
         }
@@ -183,7 +122,7 @@ export function handleCollisions() {
           if (vn < 0) {
             const e2 = rest;
             const invMassSum = 1 / p.m + 1 / q.m;
-            const jimp = -(1 + e2) * vn / invMassSum;
+            const jimp = Math.max(-100, Math.min(100, -(1 + e2) * vn / invMassSum));
             const ix = nx * jimp, iy = ny * jimp;
             p.vx -= ix * p.invM;
             p.vy -= iy * p.invM;
@@ -191,7 +130,7 @@ export function handleCollisions() {
             q.vy += iy * q.invM;
             const fr = Settings.physics.particleFriction;
             const tvx = rvx - vn * nx, tvy = rvy - vn * ny;
-            const tlen = Math.hypot(tvx, tvy) || 1e-6;
+            const tlen = Math.hypot(tvx, tvy) || 1e-4;
             const tx = tlen ? tvx / tlen : 0, ty = tlen ? tvy / tlen : 0;
             const jt = -fr * jimp;
             p.vx -= tx * jt * p.invM;
@@ -262,7 +201,7 @@ export function handleBoundaries() {
       const cy = Settings.physics.container.cy * BH;
       const R = Settings.physics.container.radiusN * (Math.min(BW, BH) / 2);
       const dx = p.x - cx, dy = p.y - cy;
-      const dist = Math.hypot(dx, dy) || 1e-6;
+      const dist = Math.hypot(dx, dy) || 1e-4;
       const allow = Math.max(2, R - p.r);
       if (dist > allow) {
         const nx = dx / dist, ny = dy / dist;

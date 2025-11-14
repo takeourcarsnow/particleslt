@@ -1,4 +1,5 @@
 import { Settings } from './config';
+import { State } from './state';
 
 // Utility functions for UI controls
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -42,34 +43,97 @@ export function group(title: string, expanded = false) {
   h.textContent = title;
   h.style.cursor = 'pointer';
   h.style.userSelect = 'none';
-  h.addEventListener('click', () => {
-    const wasCollapsed = g.classList.contains('collapsed');
-    g.classList.toggle('collapsed');
-    if (wasCollapsed) {
-      // expanding, close others
-      const parent = g.parentElement;
-      if (parent) {
-        [...parent.children].forEach(child => {
-          if (child !== g && child.classList.contains('group')) {
-            child.classList.add('collapsed');
-          }
-        });
+  h.addEventListener('click', (e) => {
+    // Only toggle this group's collapsed state. Prevent accidental toggles when
+    // clicking interactive controls inside the group header area by ignoring
+    // clicks that originate from interactive elements.
+    const path = (e as MouseEvent).composedPath ? (e as MouseEvent).composedPath() : [] as EventTarget[];
+    for (const el of path as EventTarget[]) {
+      if (!(el instanceof Element)) continue;
+      // If an interactive element (button, input, select) was the origin, don't toggle
+      if (el.tagName === 'BUTTON' || el.tagName === 'INPUT' || el.tagName === 'SELECT' || el.getAttribute('role') === 'button') {
+        return;
       }
     }
+    g.classList.toggle('collapsed');
+    // persist state by title so UI rebuilds can restore it
+    if (!State.groupStates) State.groupStates = {};
+    State.groupStates[title] = !g.classList.contains('collapsed');
   });
   g.appendChild(h);
-  if (!expanded) g.classList.add('collapsed');
+  // initialize collapsed state from persisted State if available, else use expanded param
+  const persisted = State.groupStates && Object.prototype.hasOwnProperty.call(State.groupStates, title) ? !!State.groupStates[title] : expanded;
+  if (!persisted) g.classList.add('collapsed');
   return g;
 }
 
 export function ctrlRange(parent: HTMLElement, path: string, label: string, min: number, max: number, step: number, fmtFn: (v: number) => string = (v) => String(v), onChange: ((v: number) => void) | null = null) {
   const wrap = document.createElement('div'); wrap.className = 'ctrl';
   const lab = document.createElement('label'); lab.textContent = label;
-  const right = document.createElement('div'); right.className = 'rowline';
+  const right = document.createElement('div'); right.className = 'rowline'; right.style.position = 'relative';
   const input = document.createElement('input'); input.type = 'range'; input.min = String(min); input.max = String(max); input.step = String(step); input.value = pathGet(Settings, path);
-  const val = document.createElement('span'); val.className = 'value'; val.textContent = fmtFn(+input.value);
-  input.addEventListener('input', () => { const num = parseFloat(input.value); pathSet(Settings, path, num); val.textContent = fmtFn(num); if (onChange) onChange(num); });
-  right.appendChild(input); right.appendChild(val); wrap.appendChild(lab); wrap.appendChild(right); parent.appendChild(wrap); return input;
+  const tooltip = document.createElement('div'); tooltip.style.position = 'absolute'; tooltip.style.display = 'none'; tooltip.style.background = '#333'; tooltip.style.color = '#fff'; tooltip.style.padding = '2px 4px'; tooltip.style.borderRadius = '3px'; tooltip.style.fontSize = '12px'; tooltip.style.pointerEvents = 'none'; tooltip.style.zIndex = '10'; tooltip.style.top = '-25px';
+  input.addEventListener('input', () => { 
+    const num = parseFloat(input.value); 
+    pathSet(Settings, path, num); 
+    tooltip.textContent = fmtFn(num); 
+    const percent = ((num - min) / (max - min)) * 100;
+    tooltip.style.left = `calc(${percent}% - 10px)`;
+    tooltip.style.display = 'block';
+    if (onChange) onChange(num); 
+  });
+  input.addEventListener('mousedown', () => {
+    const num = parseFloat(input.value);
+    tooltip.textContent = fmtFn(num);
+    const percent = ((num - min) / (max - min)) * 100;
+    tooltip.style.left = `calc(${percent}% - 10px)`;
+    tooltip.style.display = 'block';
+  });
+  input.addEventListener('mouseup', () => { tooltip.style.display = 'none'; });
+  input.addEventListener('mouseleave', () => { tooltip.style.display = 'none'; });
+  right.appendChild(input); right.appendChild(tooltip); wrap.appendChild(lab); wrap.appendChild(right); parent.appendChild(wrap); return input;
+}
+
+export function ctrlLogRange(parent: HTMLElement, path: string, label: string, min: number, max: number, steps: number, fmtFn: (v: number) => string = (v) => String(v), onChange: ((v: number) => void) | null = null) {
+  const wrap = document.createElement('div'); wrap.className = 'ctrl';
+  const lab = document.createElement('label'); lab.textContent = label;
+  const right = document.createElement('div'); right.className = 'rowline'; right.style.position = 'relative';
+  const input = document.createElement('input'); input.type = 'range'; input.min = '0'; input.max = String(steps); input.step = '1';
+  
+  // Convert stored value to slider position (clamp to valid range)
+  const storedValue = Math.max(min, Math.min(max, pathGet(Settings, path)));
+  const ratio = Math.log(Math.max(storedValue, min + 0.001) / min) / Math.log(max / min);
+  const position = Math.round(Math.max(0, Math.min(steps, ratio * steps)));
+  input.value = String(position);
+  
+  const tooltip = document.createElement('div'); tooltip.style.position = 'absolute'; tooltip.style.display = 'none'; tooltip.style.background = '#333'; tooltip.style.color = '#fff'; tooltip.style.padding = '2px 4px'; tooltip.style.borderRadius = '3px'; tooltip.style.fontSize = '12px'; tooltip.style.pointerEvents = 'none'; tooltip.style.zIndex = '10'; tooltip.style.top = '-25px';
+  
+  input.addEventListener('input', () => { 
+    const position = parseFloat(input.value) / steps;
+    const logValue = min * Math.pow(max / min, position);
+    const clampedValue = Math.max(min, Math.min(max, logValue));
+    pathSet(Settings, path, clampedValue); 
+    tooltip.textContent = fmtFn(clampedValue); 
+    const percent = (parseFloat(input.value) / steps) * 100;
+    tooltip.style.left = `calc(${percent}% - 10px)`;
+    tooltip.style.display = 'block';
+    if (onChange) onChange(clampedValue); 
+  });
+  
+  input.addEventListener('mousedown', () => {
+    const position = parseFloat(input.value) / steps;
+    const logValue = min * Math.pow(max / min, position);
+    const clampedValue = Math.max(min, Math.min(max, logValue));
+    tooltip.textContent = fmtFn(clampedValue);
+    const percent = (parseFloat(input.value) / steps) * 100;
+    tooltip.style.left = `calc(${percent}% - 10px)`;
+    tooltip.style.display = 'block';
+  });
+  
+  input.addEventListener('mouseup', () => { tooltip.style.display = 'none'; });
+  input.addEventListener('mouseleave', () => { tooltip.style.display = 'none'; });
+  
+  right.appendChild(input); right.appendChild(tooltip); wrap.appendChild(lab); wrap.appendChild(right); parent.appendChild(wrap); return input;
 }
 
 export function ctrlNumber(parent: HTMLElement, path: string, label: string, step = 1, onChange: ((v: number) => void) | null = null) {
@@ -117,7 +181,10 @@ export function ctrlIconSelect(parent: HTMLElement, path: string, label: string,
     btn.innerHTML = createSvg(opt.iconName);
     btn.title = opt.name;
     if (opt.value === currentValue) btn.classList.add('active');
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (e) => {
+      // Prevent the click from bubbling up to group headers or other handlers
+      // that might toggle/close sections inadvertently.
+      e.stopPropagation();
       pathSet(Settings, path, opt.value);
       [...btns.children].forEach(b => b.classList.remove('active'));
       btn.classList.add('active');

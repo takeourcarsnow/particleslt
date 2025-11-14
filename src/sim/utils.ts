@@ -55,19 +55,41 @@ export function noise2D(x:number,y:number){
   return lerp(lerp(v00,v10,u), lerp(v01,v11,u), v)*0.5+0.5;
 }
 export function curlNoise(x:number,y:number,t:number,scale=0.003, amp=1.0){
-  const eps = 1.5;
-  noise2D(x*scale, y*scale + t); // warm
+  // Finite-difference approximation of partial derivatives.
+  // Note: noise2D is sampled at coordinates scaled by `scale`, so the
+  // change in the noise input for a pixel offset eps is eps*scale. We
+  // therefore divide by (2*eps*scale) to get the derivative w.r.t. x/y
+  // in screen-space. Return the 2D curl vector perpendicular to the
+  // gradient: (-d/dy, d/dx) which produces rotational flow.
+  const eps = 2.5;
   const nx1 = noise2D((x+eps)*scale, y*scale + t);
   const nx2 = noise2D((x-eps)*scale, y*scale + t);
   const ny1 = noise2D(x*scale, (y+eps)*scale + t);
   const ny2 = noise2D(x*scale, (y-eps)*scale + t);
-  const dx = (nx1 - nx2)/(2*eps);
-  const dy = (ny1 - ny2)/(2*eps);
-  return {x: amp * (dy), y: amp * (-dx)};
+  const denom = 2 * eps * Math.max(1e-9, scale);
+  const dx = (nx1 - nx2) / denom;
+  const dy = (ny1 - ny2) / denom;
+  return { x: amp * (-dy), y: amp * (dx) };
 }
 export function flowNoiseVec(x:number,y:number,t:number,scale=0.002, amp=1.0){
-  const theta = noise2D(x*scale + t*0.31, y*scale - t*0.17) * TAU*2;
-  return {x: Math.cos(theta)*amp, y: Math.sin(theta)*amp};
+  // New "fresh" flow mode: blend an angle field (from scalar noise)
+  // with a small local curl component to introduce richer swirling
+  // behavior. This produces more organic flowing motion than a pure
+  // angle field while remaining divergence-free-ish when curl mixes in.
+  const baseTheta = noise2D(x*scale + t*0.31, y*scale - t*0.17) * TAU * 2;
+  const baseX = Math.cos(baseTheta);
+  const baseY = Math.sin(baseTheta);
+  // small local curl to add eddies
+  const swirl = curlNoise(x, y, t, scale * 0.75, 0.6);
+  // mix factor controls how much curl perturbs the base flow
+  const swirlMix = 0.35;
+  let fx = (1 - swirlMix) * baseX + swirlMix * swirl.x;
+  let fy = (1 - swirlMix) * baseY + swirlMix * swirl.y;
+  // normalize and scale by amp
+  const len = Math.hypot(fx, fy) || 1e-9;
+  fx = (fx / len) * amp;
+  fy = (fy / len) * amp;
+  return { x: fx, y: fy };
 }
 export function LCG(seed:number){
   let s = (seed>>>0) || 1;

@@ -15,14 +15,15 @@
 *{box-sizing:border-box}
 html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, Apple Color Emoji, Segoe UI Emoji;}
 canvas{position:fixed;inset:0;width:100vw;height:100vh;touch-action:none;display:block;}
-#hud{position:fixed;top:10px;left:10px;z-index:10;background:linear-gradient(180deg,#0f141d 0%, #0a0d14 100%);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:8px 12px;font-size:12px;line-height:1.4;backdrop-filter: blur(6px);box-shadow:0 6px 20px rgba(0,0,0,0.25);}
-#hud .row{display:flex;gap:12px;flex-wrap:wrap}
-#hud .tag{padding:2px 8px;border-radius:999px;background:#0d111a;border:1px solid var(--border);color:var(--muted)}
-#hud .tag b{color:var(--text)}
+#hud{position:fixed;top:10px;left:10px;z-index:10;color:var(--text);border:1px solid var(--border);border-radius:10px;padding:8px 12px;font-size:12px;line-height:1.4;backdrop-filter: blur(6px);box-shadow:0 6px 20px rgba(0,0,0,0.25);}
+#hud .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+#hud .tag{display:inline-flex;align-items:center;gap:8px;padding:4px 10px;border-radius:999px;background:#0d111a;border:1px solid var(--border);color:var(--muted);line-height:1}
+#hud .tag svg{display:block;width:12px;height:12px}
+#hud .tag b{color:var(--text);font-variant-numeric:tabular-nums}
 #hud .btn{margin-left:6px; padding:2px 8px;border-radius:6px;border:1px solid var(--border);background:#0e1220;color:var(--text);cursor:pointer;font-weight:600;}
 #hud .btn:hover{border-color:#2a2f40}
-#panel{position:fixed;right:14px;top:14px;bottom:14px;width:min(420px,92vw);display:flex;flex-direction:column;z-index:20;background:var(--panel);border:1px solid var(--border);border-radius:14px;overflow:hidden;backdrop-filter: blur(8px); box-shadow:0 10px 30px rgba(0,0,0,0.35);}
-#panelHeader{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,#1a2030, #141a28);}
+#panel{position:fixed;right:14px;top:14px;bottom:14px;width:min(420px,92vw);display:flex;flex-direction:column;z-index:20;background:transparent;border:1px solid var(--border);border-radius:14px;overflow:hidden;backdrop-filter: blur(8px); box-shadow:0 10px 30px rgba(0,0,0,0.35);}
+#panelHeader{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--border);background:transparent;}
 #panelHeader .title{font-weight:800;letter-spacing:.3px}
 #panelHeader .actions{display:flex;gap:8px}
 #panelHeader button{padding:8px 10px;border-radius:10px;background:#0f1524;border:1px solid var(--border);color:var(--text);cursor:pointer;font-weight:700}
@@ -30,7 +31,7 @@ canvas{position:fixed;inset:0;width:100vw;height:100vh;touch-action:none;display
 #tabs{display:flex;flex-wrap:wrap;gap:6px;padding:8px 10px;border-bottom:1px solid var(--border);background:var(--panel2)}
 #tabs button{padding:6px 10px;border-radius:999px;background:#0e1423;border:1px solid var(--border);color:var(--muted);cursor:pointer;font-weight:600;font-size:12px}
 #tabs button.active{color:var(--text);background:linear-gradient(180deg,#18203a,#121a30);border-color:#2a2f40}
-#content{flex:1;overflow:auto;padding:14px}
+#content{flex:1;overflow-x:hidden;overflow-y:auto;padding:14px}
 .group{border:1px solid var(--border);border-radius:12px;padding:10px 10px;margin-bottom:12px;background:rgba(10,12,18,0.55)}
 .group h3{margin:0 0 8px 0;font-size:13px;letter-spacing:.2px;color:#a9b3c0}
 .group.collapsed .ctrl{display:none}
@@ -53,7 +54,7 @@ canvas{position:fixed;inset:0;width:100vw;height:100vh;touch-action:none;display
 #tiltPrompt .bubble .row{display:flex;gap:8px;align-items:center}
 #tiltPrompt .bubble button{padding:8px 12px;border-radius:10px;border:1px solid var(--border);background:#0f1524;color:#fff;font-weight:700;cursor:pointer}
 #tiltPrompt .bubble button.primary{background:linear-gradient(180deg,#2a3553,#222a42);border-color:#2f3755}
-#togglePanel{position:fixed;left:10px;bottom:10px;z-index:30;background:#10162a;border:1px solid var(--border);color:var(--text);border-radius:999px;padding:8px 10px;cursor:pointer;font-weight:800;}
+#togglePanel{position:fixed;left:10px;bottom:10px;z-index:30;background:transparent;border:1px solid var(--border);color:var(--text);border-radius:999px;padding:8px 10px;cursor:pointer;font-weight:800;backdrop-filter: blur(8px);box-shadow:0 8px 24px rgba(0,0,0,0.25);} 
 #togglePanel small{color:#98a3b0}
 #panel.hidden{display:none}
 .chip{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:999px;border:1px solid var(--border);background:#0e1423;color:#8ea0b7;font-size:12px;margin-right:6px}
